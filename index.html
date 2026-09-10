@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>End-to-End Analytics — From Click to Revenue</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Onest:wght@400;600;700;800;900&display=swap');
+
+  :root{
+    --bg:#F0EEE9;
+    --ink:#141210;
+    --navy:#1B3B4A;
+    --leaf:#5B7A50;
+    --gold:#C99A3B;
+    --muted:#9b968c;
+    --ease:cubic-bezier(.16,1,.3,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{
+    width:1920px;height:1080px;
+    background:var(--bg);
+    overflow:hidden;
+    font-family:'Onest',sans-serif;
+    color:var(--ink);
+  }
+  #stage{position:relative;width:1920px;height:1080px;}
+
+  .card{
+    position:absolute;
+    background:#fff;
+    border-radius:18px;
+    box-shadow:0 18px 50px -12px rgba(20,18,16,.18), 0 4px 12px rgba(20,18,16,.06);
+    overflow:hidden;
+  }
+  .card .topbar{position:absolute;top:0;left:0;right:0;height:6px;}
+  .card .body{padding:18px 20px;display:flex;flex-direction:column;gap:10px;height:100%;}
+  .ph-line{height:9px;border-radius:6px;background:#e6e3dc;}
+  .ph-line.w80{width:80%;} .ph-line.w60{width:60%;} .ph-line.w40{width:40%;}
+
+  /* ===== Scene 1: scattered source islands ===== */
+  #scene1{position:absolute;inset:0;}
+  .source{
+    position:absolute;
+    width:230px;height:130px;
+    border-radius:16px;
+    background:#fff;
+    box-shadow:0 14px 40px -10px rgba(20,18,16,.14);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:10px;
+    opacity:0;
+    filter:saturate(.55) brightness(1.0);
+  }
+  .source .dot-icon{
+    width:42px;height:42px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:13px;color:#fff;
+  }
+  .source .name{font-size:14px;font-weight:700;color:#6b665c;letter-spacing:.01em;}
+  #src-amo .dot-icon{background:#e2702a;} #src-amo{left:120px;top:120px;}
+  #src-yandex .dot-icon{background:#c41616;} #src-yandex{left:560px;top:80px;}
+  #src-google .dot-icon{background:#4285F4;} #src-google{left:140px;top:420px;}
+  #src-meta .dot-icon{background:#0866FF;} #src-meta{left:520px;top:480px;}
+  #src-1c .dot-icon{background:var(--navy);} #src-1c{left:300px;top:730px;}
+
+  /* connecting lines (svg) drawn over scene1+2 */
+  #wires{position:absolute;inset:0;pointer-events:none;}
+  #wires path{
+    fill:none;stroke:var(--gold);stroke-width:2.5;
+    stroke-dasharray:1200;stroke-dashoffset:1200;
+    opacity:0;
+  }
+
+  /* ===== Scene 2/3: central node ===== */
+  #node{
+    position:absolute;
+    left:960px;top:540px;
+    width:0;height:0;
+  }
+  #nodeCore{
+    position:absolute;left:-70px;top:-70px;width:140px;height:140px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #ffffff, #f3ead2 60%, #e7d9ad 100%);
+    box-shadow:0 0 0 0 rgba(201,154,59,.5), 0 20px 60px -10px rgba(20,18,16,.25);
+    opacity:0;
+    display:flex;align-items:center;justify-content:center;
+  }
+  #nodeLabel{
+    font-size:20px;font-weight:800;color:var(--navy);letter-spacing:.02em;
+    opacity:0;
+  }
+  #nodeRing{
+    position:absolute;left:-70px;top:-70px;width:140px;height:140px;border-radius:50%;
+    border:2px solid var(--gold);
+    opacity:0;
+  }
+  .pulseval{
+    position:absolute;
+    font-size:16px;font-weight:700;color:var(--navy);
+    opacity:0;white-space:nowrap;
+  }
+  #pv1{left:-260px;top:-90px;}
+  #pv2{left:-260px;top:-10px;}
+  #pv3{left:-260px;top:70px;}
+
+  /* ===== Scene 4: outflow metrics ===== */
+  #outflow{
+    position:absolute;
+    left:1180px;top:330px;
+    width:560px;height:420px;
+    opacity:0;
+  }
+  .metric{
+    background:#fff;border-radius:18px;padding:26px 30px;
+    box-shadow:0 18px 50px -12px rgba(20,18,16,.14);
+    margin-bottom:24px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .metric .label{font-size:16px;font-weight:600;color:var(--muted);}
+  .metric .val{font-size:42px;font-weight:900;letter-spacing:-.02em;}
+  .metric.down .val{color:#a14b3e;}
+  .metric.up .val{color:var(--leaf);}
+  .metric .arrow{font-size:28px;margin-left:10px;}
+  .revenueBigVal{
+    font-size:64px;font-weight:900;color:var(--ink);text-align:center;
+    margin-top:8px;
+  }
+  #revenueLbl{
+    text-align:center;font-size:16px;font-weight:600;color:var(--muted);margin-top:4px;
+  }
+
+  /* ===== Scene 5: mini dashboard snapshot ===== */
+  #miniDash{
+    position:absolute;
+    left:300px;top:170px;
+    width:1320px;height:680px;
+    opacity:0;
+  }
+  .kpi-row{display:flex;gap:28px;margin-bottom:28px;}
+  .kpi{
+    flex:1;background:#fff;border-radius:18px;padding:24px 28px;
+    box-shadow:0 18px 50px -12px rgba(20,18,16,.14);
+    position:relative;overflow:hidden;
+  }
+  .kpi .topbar{position:absolute;top:0;left:0;right:0;height:5px;}
+  .kpi.tb-navy .topbar{background:var(--navy);}
+  .kpi.tb-leaf .topbar{background:var(--leaf);}
+  .kpi.tb-gold .topbar{background:var(--gold);}
+  .kpi .kpi-num{font-size:38px;font-weight:900;}
+  .kpi .kpi-lbl{font-size:14px;font-weight:600;color:var(--muted);margin-top:6px;}
+  #chartCard{
+    background:#fff;border-radius:18px;padding:28px 32px;
+    box-shadow:0 18px 50px -12px rgba(20,18,16,.14);
+    height:340px;
+    display:flex;flex-direction:column;
+  }
+  #chartCard .chart-title{font-size:15px;font-weight:700;color:var(--muted);margin-bottom:18px;}
+  #chartBars{display:flex;align-items:flex-end;gap:24px;flex:1;}
+  .cbar{flex:1;border-radius:8px 8px 4px 4px;height:0%;background:linear-gradient(180deg,var(--leaf),var(--navy));}
+
+  /* ===== Scene 6: end card ===== */
+  #endcard{
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;
+    opacity:0;background:var(--bg);
+  }
+  #endcard .title{
+    font-size:64px;font-weight:900;letter-spacing:-.01em;text-align:center;
+    opacity:0;transform:translateY(16px);
+  }
+  #endcard .tagline{
+    font-size:26px;font-weight:600;color:var(--muted);text-align:center;
+    opacity:0;transform:translateY(16px);
+  }
+  #endcard .tagline b{color:var(--leaf);font-weight:800;}
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <svg id="wires" width="1920" height="1080" viewBox="0 0 1920 1080">
+    <path id="wire-amo" d="M 235 185 C 600 260, 850 480, 960 540"/>
+    <path id="wire-yandex" d="M 675 145 C 800 280, 900 440, 960 540"/>
+    <path id="wire-google" d="M 255 485 C 600 520, 850 535, 960 540"/>
+    <path id="wire-meta" d="M 635 545 C 800 545, 880 542, 960 540"/>
+    <path id="wire-1c" d="M 415 795 C 650 700, 850 600, 960 540"/>
+  </svg>
+
+  <div id="scene1">
+    <div class="source" id="src-amo"><div class="dot-icon">CRM</div><div class="name">AmoCRM</div></div>
+    <div class="source" id="src-yandex"><div class="dot-icon">YD</div><div class="name">Yandex Direct</div></div>
+    <div class="source" id="src-google"><div class="dot-icon">G</div><div class="name">Google Ads</div></div>
+    <div class="source" id="src-meta"><div class="dot-icon">M</div><div class="name">Meta Ads</div></div>
+    <div class="source" id="src-1c"><div class="dot-icon">1C</div><div class="name">1C — Sales</div></div>
+  </div>
+
+  <div id="node">
+    <div id="nodeRing"></div>
+    <div id="nodeCore"><div id="nodeLabel">utm_campaign</div></div>
+    <div class="pulseval" id="pv1">click → $0.42</div>
+    <div class="pulseval" id="pv2">lead → qualified</div>
+    <div class="pulseval" id="pv3">deal → ₸184,000</div>
+  </div>
+
+  <div id="outflow">
+    <div class="metric down">
+      <div class="label">CPL</div>
+      <div class="val" id="cplVal">$—</div>
+      <div class="arrow">↓</div>
+    </div>
+    <div class="metric up">
+      <div class="label">ROAS</div>
+      <div class="val" id="roasVal">—×</div>
+      <div class="arrow">↑</div>
+    </div>
+    <div id="revVal" class="revenueBigVal">0</div>
+    <div id="revenueLbl">total revenue, attributed</div>
+  </div>
+
+  <div id="miniDash">
+    <div class="kpi-row">
+      <div class="kpi tb-navy"><div class="topbar"></div><div class="kpi-num" id="k1">0</div><div class="kpi-lbl">campaigns tracked</div></div>
+      <div class="kpi tb-leaf"><div class="topbar"></div><div class="kpi-num" id="k2">0×</div><div class="kpi-lbl">avg ROAS</div></div>
+      <div class="kpi tb-gold"><div class="topbar"></div><div class="kpi-num" id="k3">$0</div><div class="kpi-lbl">CPL, blended</div></div>
+      <div class="kpi tb-navy"><div class="topbar"></div><div class="kpi-num" id="k4">0</div><div class="kpi-lbl">deals matched</div></div>
+    </div>
+    <div id="chartCard">
+      <div class="chart-title">Revenue by month, attributed to ad spend</div>
+      <div id="chartBars">
+        <div class="cbar" id="cb0"></div>
+        <div class="cbar" id="cb1"></div>
+        <div class="cbar" id="cb2"></div>
+        <div class="cbar" id="cb3"></div>
+        <div class="cbar" id="cb4"></div>
+        <div class="cbar" id="cb5"></div>
+        <div class="cbar" id="cb6"></div>
+        <div class="cbar" id="cb7"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="endcard">
+    <div class="title">End-to-End Analytics</div>
+    <div class="tagline">All channels. One number.<br><b>From click to revenue — no blind spots.</b></div>
+  </div>
+
+</div>
+
+<script>
+const EASE = 'cubic-bezier(.16,1,.3,1)';
+function show(el, props, duration, delay){
+  return el.animate(props, {duration, delay, easing: EASE, fill:'forwards'});
+}
+function animateNumber(el, end, opts, delay){
+  const { prefix='', suffix='', decimals=0 } = opts || {};
+  setTimeout(()=>{
+    const start = performance.now(); const duration = opts.duration || 1100;
+    function tick(now){
+      const p = Math.min(1, (now-start)/duration);
+      const eased = 1 - Math.pow(1-p, 3);
+      el.textContent = prefix + (end*eased).toFixed(decimals) + suffix;
+      if(p<1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }, delay);
+}
+
+// =================== TIMELINE (ms) ===================
+// 0-3000    scene1: scattered source islands fade/pop in, disconnected
+// 3000-7000 wires draw and converge toward center node, glow on connect
+// 7000-10000 node: utm label lights up, pulse values blink through it
+// 10000-14000 outflow: CPL down, ROAS up, revenue ticks up
+// 14000-17000 mini dashboard snapshot (KPI cards + bar chart)
+// 17000-20000 end card
+
+// ---- Scene 1: sources pop in, staggered, slightly desaturated/scattered ----
+const sources = document.querySelectorAll('.source');
+sources.forEach((s,i)=>{
+  show(s, [
+    {opacity:0, transform:'scale(.85) translateY(14px)'},
+    {opacity:1, transform:'scale(1) translateY(0)'}
+  ], 650, 150 + i*160);
+});
+
+// ---- Scene 2: wires draw in (stroke-dashoffset) and converge ----
+const wireIds = ['wire-amo','wire-yandex','wire-google','wire-meta','wire-1c'];
+wireIds.forEach((id,i)=>{
+  const path = document.getElementById(id);
+  show(path, [
+    {opacity:0, strokeDashoffset:1200},
+    {opacity:.85, strokeDashoffset:1200, offset:0.05},
+    {opacity:.85, strokeDashoffset:0}
+  ], 1200, 3000 + i*130);
+});
+
+// desaturate->saturate sources as they "connect"
+sources.forEach((s,i)=>{
+  show(s, [{filter:'saturate(.55)'},{filter:'saturate(1)'}], 700, 3600 + i*130);
+});
+
+// node glow burst on convergence complete (~7000)
+show(document.getElementById('nodeCore'),
+  [{opacity:0, transform:'scale(.6)'},{opacity:1, transform:'scale(1)'}],
+  700, 6600);
+show(document.getElementById('nodeRing'),
+  [{opacity:.9, transform:'scale(1)'},{opacity:0, transform:'scale(2.4)'}],
+  900, 6700);
+
+// gentle breathing pulse on the core while values blink through it
+document.getElementById('nodeCore').animate(
+  [{transform:'scale(1)'},{transform:'scale(1.045)'},{transform:'scale(1)'}],
+  { duration: 900, delay: 7400, iterations: 3, easing: EASE }
+);
+
+// fade source islands + wires out before pulse scene fully takes over (keep node)
+show(document.getElementById('scene1'), [{opacity:1},{opacity:1},{opacity:0}], 900, 9300);
+show(document.getElementById('wires'), [{opacity:1},{opacity:1},{opacity:0}], 900, 9300);
+
+// ---- Scene 3: utm label + pulse values ----
+show(document.getElementById('nodeLabel'), [{opacity:0},{opacity:1}], 500, 7100);
+const pulses = ['pv1','pv2','pv3'];
+pulses.forEach((id,i)=>{
+  const el = document.getElementById(id);
+  // blink twice within the 7000-10000 window
+  show(el, [
+    {opacity:0, transform:'translateX(20px)'},
+    {opacity:1, transform:'translateX(0)', offset:0.25},
+    {opacity:1, transform:'translateX(0)', offset:0.7},
+    {opacity:0, transform:'translateX(-10px)'}
+  ], 1300, 7600 + i*420);
+});
+pulses.forEach((id,i)=>{
+  const el = document.getElementById(id);
+  show(el, [
+    {opacity:0, transform:'translateX(20px)'},
+    {opacity:1, transform:'translateX(0)', offset:0.25},
+    {opacity:1, transform:'translateX(0)', offset:0.7},
+    {opacity:0, transform:'translateX(-10px)'}
+  ], 1300, 9000 + i*300);
+});
+
+// move node off + fade before outflow scene
+show(document.getElementById('node'), [{opacity:1},{opacity:1},{opacity:0}], 800, 9900);
+
+// ---- Scene 4: outflow metrics ----
+show(document.getElementById('outflow'), [{opacity:0},{opacity:1}], 600, 10000);
+animateNumber(document.getElementById('cplVal'), 1.85, {prefix:'$', decimals:2, duration:1300}, 10300);
+animateNumber(document.getElementById('roasVal'), 4.6, {suffix:'×', decimals:1, duration:1300}, 10500);
+animateNumber(document.getElementById('revVal'), 318400, {prefix:'₸', decimals:0, duration:1600}, 10700);
+
+show(document.getElementById('outflow'), [{opacity:1},{opacity:1},{opacity:0}], 700, 13500);
+
+// ---- Scene 5: mini dashboard snapshot ----
+show(document.getElementById('miniDash'), [{opacity:0},{opacity:1}], 600, 14000);
+const kpis = document.querySelectorAll('.kpi');
+kpis.forEach((k,i)=>{
+  show(k, [{opacity:0, transform:'translateY(16px)'},{opacity:1, transform:'translateY(0)'}], 600, 14100 + i*110);
+});
+animateNumber(document.getElementById('k1'), 24, {duration:900}, 14400);
+animateNumber(document.getElementById('k2'), 4.6, {suffix:'×', decimals:1, duration:900}, 14500);
+animateNumber(document.getElementById('k3'), 1.85, {prefix:'$', decimals:2, duration:900}, 14600);
+animateNumber(document.getElementById('k4'), 137, {duration:900}, 14700);
+
+const barHeights = [35,55,45,70,60,90,78,100];
+for(let i=0;i<8;i++){
+  show(document.getElementById('cb'+i), [{height:'0%'},{height:barHeights[i]+'%'}], 700, 14800 + i*80);
+}
+
+show(document.getElementById('miniDash'), [{opacity:1},{opacity:1},{opacity:0}], 700, 16800);
+
+// ---- Scene 6: end card ----
+show(document.getElementById('endcard'), [{opacity:0},{opacity:1}], 500, 17000);
+show(document.getElementById('endcard').querySelector('.title'),
+  [{opacity:0, transform:'translateY(16px)'},{opacity:1, transform:'translateY(0)'}], 700, 17200);
+show(document.getElementById('endcard').querySelector('.tagline'),
+  [{opacity:0, transform:'translateY(16px)'},{opacity:1, transform:'translateY(0)'}], 700, 17500);
+</script>
+</body>
+</html>
