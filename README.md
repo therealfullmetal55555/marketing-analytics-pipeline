@@ -1,19 +1,48 @@
-# Fares Korea — End-to-End Analytics Pipeline
+# Marketing Analytics Dashboard — Visual Prototype
 
-Dashboard that traces revenue back to its source — from AmoCRM leads and ad spend through to actual sales — so spend and outcome sit on one screen instead of three separate exports.
+Интерактивный демонстрационный интерфейс дашборда сквозной аналитики для e-commerce: визуализирует движение показателей от рекламных расходов и заявок в CRM до итоговых продаж.
 
-This repo is a self-contained visual walkthrough of the dashboard (`index.html`). The production version reads live from the client's AmoCRM and ad accounts, so it isn't public — this demo shows the same structure and flow without any of that.
+---
 
-## What it does
+## О проекте и формат демонстрации
 
-- Pulls together AmoCRM, ad platforms and sales data that used to live in separate exports
-- Traces the funnel from click to lead to revenue, so a spend number and a result number sit next to each other
-- Built to answer one question fast: which channel is actually paying for itself
+Этот репозиторий представляет собой **автономный фронтенд-прототип (`index.html`)** с демонстрационным набором данных.
 
-## Why it exists
+* **Что показано здесь:** структура и компоновка единого дашборда, позволяющего сопоставить затраты на рекламу, лиды и продажи на одном экране вместо разрозненных выгрузок из нескольких систем.
+* **Честное разделение:** публичный репозиторий содержит исключительно интерфейсную демонстрацию (HTML5/CSS3/JavaScript) с модельными данными. Здесь нет закрытых ключей API, приватных клиентских баз и серверных интеграций.
 
-Built for an e-commerce brand selling on Wildberries and Ozon. Before this, checking whether an ad channel was profitable meant pulling CRM data, ad spend, and sales figures separately and reconciling them by hand.
+---
 
-## Stack
+## Какую задачу решает концепция
 
-Frontend dashboard in vanilla HTML/CSS/JS. Production version syncs live data from AmoCRM's API; 1C sales data is reconciled monthly.
+В небольших e-commerce командах данные о трафике, лидах в CRM и фактических отгрузках часто хранятся в разных кабинетах и таблицах. Прототип демонстрирует подход к сведению ключевых метрик:
+
+* **Воронка расходов и отдачи:** клики → заявки → подтверждённые заказы → выручка.
+* **Сравнение каналов:** оперативная оценка того, какие рекламные источники окупаются, а какие генерируют неквалифицированный трафик.
+* **Компактная сводка:** отображение ключевых показателей эффективности (CPA, CPO, ДРР) в одном окне.
+
+---
+
+## Стек технологий
+
+* **Фронтенд:** Vanilla HTML5, CSS3, чистый JavaScript (ES6+).
+* **Зависимости:** нулевые (zero dependencies), не требует установки пакетов и сборщиков.
+
+---
+
+## Как запустить демо локально
+
+1. Склонируйте репозиторий:
+   ```bash
+   git clone https://github.com/therealfullmetal55555/marketing-analytics-pipeline.git
+   cd marketing-analytics-pipeline
+   ```
+
+2. Откройте `index.html` в любом браузере:
+   ```bash
+   open index.html
+   ```
+   или запустите локальный веб-сервер:
+   ```bash
+   python3 -m http.server 8000
+   ```
